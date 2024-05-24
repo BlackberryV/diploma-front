@@ -18,8 +18,8 @@ import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#2A629A",
-      light: "#dde0e3",
+      main: "#205B96",
+      light: "#E7EDF4",
     },
     secondary: {
       main: "#31363F",
@@ -28,7 +28,7 @@ const theme = createTheme({
       main: "#799351",
     },
     warning: {
-      main: "#FF7F3E",
+      main: "#FFC83E",
     },
   },
 });
@@ -56,7 +56,7 @@ export default function Template({ children }: PropsWithChildren) {
         >
           <Grid item>
             <Button onClick={() => push("/")}>
-              <MapsHomeWorkIcon htmlColor="black" />
+              <MapsHomeWorkIcon htmlColor={theme.palette.secondary.main} />
             </Button>
           </Grid>
           <Grid container gap={1} width={"fit-content"}>

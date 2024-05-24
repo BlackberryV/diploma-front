@@ -4,12 +4,24 @@ import {
   ExtendedCollection,
   updateCollection,
 } from "@/api/common";
-import { Grid, Typography, Chip, Button, Box, Link } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Chip,
+  Button,
+  Box,
+  Link,
+  TextField,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { LinearProgress, LinearProgressProps } from "@mui/material";
-
+import * as Yup from "yup";
 import * as React from "react";
+import { useCommonStore } from "@/store/commonStore";
+import { useShallow } from "zustand/react/shallow";
+import { useFormik } from "formik";
+import { getStatusChipColor } from "@/helpers/collections";
 
 function LinearProgressWithLabel(
   props: LinearProgressProps & { value: number }
@@ -48,20 +60,42 @@ export const CollectionPage: FC<ColectionPageProps> = ({
     monobankJarLink,
     author,
     field,
+    rejectReason,
   } = collection;
 
   const { back } = useRouter();
 
-  const handleStatusChange = (
+  const { fetchCollections } = useCommonStore(useShallow((state) => state));
+
+  const handleStatusChange = async (
     status: CollectionStatus,
-    rejectMessage?: string
+    rejectReason?: string
   ) => {
-    updateCollection({ ...collection, status, rejectMessage });
+    await updateCollection({
+      ...collection,
+      status,
+      rejectReason: rejectReason || null,
+    });
+    await fetchCollections();
   };
 
+  const formik = useFormik<{ rejectReason: string }>({
+    initialValues: {
+      rejectReason: "",
+    },
+    validateOnChange: true,
+    validationSchema: Yup.object().shape({
+      rejectReason: Yup.string().required("Required"),
+    }),
+    onSubmit: async ({ rejectReason }, { resetForm }) => {
+      handleStatusChange(CollectionStatus.REJECTED, rejectReason);
+      resetForm();
+    },
+  });
+
   return (
-    <Grid container spacing={2} marginTop={2}>
-      <Grid item marginBottom={4} xs={12}>
+    <Grid container spacing={4} marginTop={2}>
+      <Grid item xs={12}>
         <Grid container display="flex" justifyContent="space-between">
           <Grid item>
             <Button variant="outlined" onClick={back}>
@@ -70,32 +104,92 @@ export const CollectionPage: FC<ColectionPageProps> = ({
           </Grid>
           {isAdmin && (
             <Grid item>
-              <Grid container spacing={2}>
+              <Grid
+                container
+                spacing={2}
+                flexDirection="column"
+                alignItems="end"
+              >
                 {status === CollectionStatus.PUBLISHED ? (
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      onClick={() =>
-                        handleStatusChange(CollectionStatus.PENDING)
-                      }
-                      color="secondary"
-                    >
-                      unpublish
-                    </Button>
-                  </Grid>
-                ) : (
                   <>
                     <Grid item>
                       <Button
                         variant="contained"
                         onClick={() =>
-                          handleStatusChange(CollectionStatus.REJECTED)
+                          handleStatusChange(CollectionStatus.PENDING)
                         }
-                        color="error"
+                        color="secondary"
+                        sx={{
+                          minWidth: "150px",
+                        }}
                       >
-                        reject
+                        unpublish
                       </Button>
                     </Grid>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        onClick={() =>
+                          handleStatusChange(CollectionStatus.CLOSED)
+                        }
+                        color="secondary"
+                        sx={{
+                          minWidth: "150px",
+                        }}
+                      >
+                        close
+                      </Button>
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    {status !== CollectionStatus.REJECTED &&
+                      status !== CollectionStatus.CLOSED && (
+                        <Grid item>
+                          <Box component="form" onSubmit={formik.handleSubmit}>
+                            <Grid container spacing={2}>
+                              <Grid item>
+                                <TextField
+                                  autoComplete="rejectReason"
+                                  name="rejectReason"
+                                  required
+                                  fullWidth
+                                  id="rejectReason"
+                                  label="Reject reason"
+                                  autoFocus
+                                  size="small"
+                                  onChange={formik.handleChange}
+                                  value={formik.values.rejectReason}
+                                  error={
+                                    !!(
+                                      formik.touched.rejectReason &&
+                                      formik.errors.rejectReason
+                                    )
+                                  }
+                                  helperText={
+                                    formik.touched.rejectReason &&
+                                    formik.errors.rejectReason
+                                      ? formik.errors.rejectReason
+                                      : null
+                                  }
+                                />
+                              </Grid>
+                              <Grid item>
+                                <Button
+                                  variant="contained"
+                                  type="submit"
+                                  color="error"
+                                  sx={{
+                                    minWidth: "150px",
+                                  }}
+                                >
+                                  reject
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Grid>
+                      )}
                     <Grid item>
                       <Button
                         variant="contained"
@@ -103,6 +197,9 @@ export const CollectionPage: FC<ColectionPageProps> = ({
                           handleStatusChange(CollectionStatus.PUBLISHED)
                         }
                         color="success"
+                        sx={{
+                          minWidth: "150px",
+                        }}
                       >
                         publish
                       </Button>
@@ -121,13 +218,22 @@ export const CollectionPage: FC<ColectionPageProps> = ({
               {title}
             </Typography>
           </Grid>
-          <Grid item>
-            <Chip
-              label={status.toUpperCase()}
-              color="warning"
-              sx={{ fontWeight: 700 }}
-            />
-          </Grid>
+          {(isAdmin || status === CollectionStatus.CLOSED) && (
+            <Grid item>
+              <Chip
+                label={status.toUpperCase()}
+                color={getStatusChipColor(status)}
+                sx={{ fontWeight: 700 }}
+              />
+            </Grid>
+          )}
+          {(isUser || isAdmin) && rejectReason && (
+            <Grid item>
+              <Typography component="h3" variant="subtitle1">
+                Reject reason: {rejectReason}
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </Grid>
       <Grid item xs={12} md={6}>

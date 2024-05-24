@@ -88,7 +88,7 @@ export interface Collection {
   status: CollectionStatus;
   monobankJarWidgetId: string;
   monobankJarLink: string;
-  rejectMessage?: string;
+  rejectReason: string | null;
 }
 
 export const createCollection = (

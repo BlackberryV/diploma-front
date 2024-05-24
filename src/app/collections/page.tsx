@@ -4,32 +4,100 @@ import { CollectionStatus } from "@/api/common";
 import { ColelctionsList } from "@/components/CollectionsList";
 import { useCommonStore } from "@/store/commonStore";
 import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
+  FormControl,
+  FormHelperText,
   Grid,
+  InputLabel,
+  MenuItem,
+  Select,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import error from "next/error";
+import { useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 export default function CollectionsPage() {
-  const { collections } = useCommonStore(useShallow((state) => state));
+  const { collections, fields } = useCommonStore(useShallow((state) => state));
 
-  const publishedCollections = useMemo(
-    () => collections?.filter((c) => c.status === CollectionStatus.PENDING),
-    [collections]
-  );
+  const [filterField, setFilterField] = useState<string>();
+  const [filterStatus, setFilterStatus] = useState<string>();
 
-  return publishedCollections ? (
-    <ColelctionsList
-      collections={publishedCollections}
-      showStatus={false}
-      showMoreLink={"/collections"}
-    />
+  const filteredCollections = useMemo(() => {
+    return collections
+      ?.filter(({ status }) => {
+        if (filterStatus) {
+          return filterStatus === status;
+        }
+
+        return (
+          status === CollectionStatus.PUBLISHED ||
+          status === CollectionStatus.CLOSED
+        );
+      })
+      .filter(({ field }) => (filterField ? field._id === filterField : true));
+  }, [collections, filterField, filterStatus]);
+
+  return filteredCollections ? (
+    <Grid container sx={{ marginTop: "48px" }} spacing={2}>
+      <Grid item xs={3}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label" required>
+            Collection field
+          </InputLabel>
+          <Select
+            labelId="project-field"
+            id="field"
+            name="field"
+            onChange={(e) => setFilterField(e.target.value)}
+            value={filterField}
+            label="Collection field"
+          >
+            <MenuItem value={undefined}>
+              <em>None</em>
+            </MenuItem>
+            {fields?.map(({ _id, title }) => (
+              <MenuItem value={_id} key={_id}>
+                {title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+      <Grid item xs={3}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label" required>
+            Collection status
+          </InputLabel>
+          <Select
+            labelId="status"
+            id="status"
+            name="status"
+            onChange={(e) => setFilterStatus(e.target.value)}
+            value={filterStatus}
+            label="Collection status"
+          >
+            <MenuItem value={undefined}>
+              <em>None</em>
+            </MenuItem>
+            <MenuItem
+              value={CollectionStatus.PUBLISHED}
+              key={CollectionStatus.PUBLISHED}
+            >
+              Діючі
+            </MenuItem>
+            <MenuItem
+              value={CollectionStatus.CLOSED}
+              key={CollectionStatus.CLOSED}
+            >
+              Завершені
+            </MenuItem>
+          </Select>
+        </FormControl>
+      </Grid>
+      <ColelctionsList
+        collections={filteredCollections}
+        showMoreLink={"/collections"}
+      />
+    </Grid>
   ) : null;
 }
