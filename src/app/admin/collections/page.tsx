@@ -12,6 +12,7 @@ export default function AdminCollections() {
       collections={collections || []}
       showMoreLink="/admin/collections"
       isAdminPanel
+      showMoreLinkText="Перевірити"
     />
   );
 }

@@ -12,6 +12,7 @@ import {
   Box,
   Link,
   TextField,
+  Avatar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -72,9 +73,9 @@ export const CollectionPage: FC<ColectionPageProps> = ({
     rejectReason?: string
   ) => {
     await updateCollection({
-      ...collection,
       status,
       rejectReason: rejectReason || null,
+      _id: collection._id,
     });
     await fetchCollections();
   };
@@ -227,16 +228,21 @@ export const CollectionPage: FC<ColectionPageProps> = ({
               />
             </Grid>
           )}
-          {(isUser || isAdmin) && rejectReason && (
-            <Grid item>
-              <Typography component="h3" variant="subtitle1">
-                Reject reason: {rejectReason}
-              </Typography>
-            </Grid>
-          )}
         </Grid>
       </Grid>
       <Grid item xs={12} md={6}>
+        {(isUser || isAdmin) && rejectReason && (
+          <Grid item>
+            <Typography
+              component="h3"
+              variant="subtitle1"
+              color="error"
+              sx={{ fontWeight: 700 }}
+            >
+              Reject reason: {rejectReason}
+            </Typography>
+          </Grid>
+        )}
         <Typography component="h3" variant="subtitle1">
           Due date: {new Date(dueDate).toDateString()}
         </Typography>
@@ -272,14 +278,27 @@ export const CollectionPage: FC<ColectionPageProps> = ({
       </Grid>
 
       <Grid item xs={12}>
-        <Typography component="article" variant="body2" color="text.primary">
-          Author: {author.name} {author.surname}
-        </Typography>
-        {isAdmin && (
-          <Typography component="article" variant="body2" color="text.primary">
-            Contact email: {author.email}
-          </Typography>
-        )}
+        <Grid container spacing={2}>
+          <Grid item>
+            <Avatar alt="Remy Sharp" src={monobankJar?.ownerIcon} />
+          </Grid>
+          <Grid item>
+            <Typography
+              component="article"
+              variant="body2"
+              color="text.primary"
+            >
+              Author: {author.name} {author.surname}
+            </Typography>
+            <Typography
+              component="article"
+              variant="body2"
+              color="text.primary"
+            >
+              Contact email: {author.email}
+            </Typography>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   );

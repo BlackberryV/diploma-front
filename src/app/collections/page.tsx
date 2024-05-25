@@ -3,16 +3,7 @@
 import { CollectionStatus } from "@/api/common";
 import { ColelctionsList } from "@/components/CollectionsList";
 import { useCommonStore } from "@/store/commonStore";
-import {
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
-import error from "next/error";
+import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -97,6 +88,7 @@ export default function CollectionsPage() {
       <ColelctionsList
         collections={filteredCollections}
         showMoreLink={"/collections"}
+        showMoreLinkText="Показати більше"
       />
     </Grid>
   ) : null;

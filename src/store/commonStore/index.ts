@@ -69,8 +69,6 @@ export const useCommonStore = create<CommonStorageState>()((set, getState) => ({
 
       const updatedData = await Promise.all(updatedDataPromises);
 
-      console.log(updatedData);
-
       set({ collections: updatedData });
     } catch (error) {
       console.log(error);
@@ -78,6 +76,6 @@ export const useCommonStore = create<CommonStorageState>()((set, getState) => ({
   },
   logout: () => {
     useLocalStorageStore.getState().remove(STORAGE.TOKEN);
-    set({ user: undefined });
+    set({ user: undefined, isAdmin: false });
   },
 }));

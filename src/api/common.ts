@@ -16,6 +16,17 @@ export const getUserById = (id: string): Promise<AxiosResponse<User>> => {
   return axiosInstance.get(`/auth/users/${id}`);
 };
 
+export const getUsers = (): Promise<AxiosResponse<User[]>> => {
+  return axiosInstance.get(`/auth/users`);
+};
+
+export const updateUserRole = (
+  email: string,
+  newRole: string
+): Promise<AxiosResponse<User>> => {
+  return axiosInstance.patch(`/auth/users`, { newRole, email });
+};
+
 interface RegistrationPayload {
   email: string;
   password: string;
@@ -97,8 +108,13 @@ export const createCollection = (
   return axiosInstance.post(`/collection`, data);
 };
 
+interface UpdateCollectionPayload extends CollectionPayload {
+  rejectReason: string | null;
+  status: CollectionStatus;
+}
+
 export const updateCollection = (
-  data: Collection
+  data: Partial<UpdateCollectionPayload> & { _id: string }
 ): Promise<AxiosResponse<Collection>> => {
   return axiosInstance.patch(`/collection`, data);
 };

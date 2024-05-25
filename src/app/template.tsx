@@ -68,12 +68,18 @@ export default function Template({ children }: PropsWithChildren) {
                       variant="text"
                       onClick={() => push("/admin/collections")}
                     >
-                      <Grid container alignItems={"center"} gap={1}>
-                        <Grid item>Admin panel</Grid>
-                      </Grid>
+                      Admin panel
                     </Button>
                   </Grid>
                 )}
+                <Grid item>
+                  <Button
+                    variant="text"
+                    onClick={() => push("/user/collections")}
+                  >
+                    My collections
+                  </Button>
+                </Grid>
                 <Grid item>
                   <Button
                     variant="text"

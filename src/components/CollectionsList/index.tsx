@@ -1,27 +1,18 @@
 import { Collection } from "@/api/common";
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Chip,
-} from "@mui/material";
-import { useRouter } from "next/navigation";
+import { Grid, Typography } from "@mui/material";
 import { FC } from "react";
 import { CollectionComponent } from "../Collection";
 
 interface ColelctionsListProps {
   collections: Collection[];
   showMoreLink: string;
+  showMoreLinkText: string;
   isAdminPanel?: boolean;
 }
 
 export const ColelctionsList: FC<ColelctionsListProps> = ({
   collections,
-  showMoreLink,
-  isAdminPanel,
+  ...props
 }) => {
   return (
     <Grid container sx={{ marginTop: "48px" }} spacing={2}>
@@ -30,8 +21,7 @@ export const ColelctionsList: FC<ColelctionsListProps> = ({
           <CollectionComponent
             key={collection._id}
             collection={collection}
-            showMoreLink={showMoreLink}
-            isAdminPanel={isAdminPanel}
+            {...props}
           />
         ))
       ) : (

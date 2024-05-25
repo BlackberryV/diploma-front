@@ -1,8 +1,10 @@
 "use client";
 
+import { useCommonStore } from "@/store/commonStore";
 import { Container, Tab, Tabs } from "@mui/material";
-import { usePathname, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren, useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 const tabs = [
   { value: "collections", label: "collections' requests" },
@@ -13,6 +15,8 @@ const tabs = [
 export default function AdminTemplate({ children }: PropsWithChildren) {
   const [value, setValue] = useState<string>();
   const { push } = useRouter();
+
+  const { isAdmin } = useCommonStore(useShallow((state) => state));
 
   const pathname = usePathname();
 
@@ -28,6 +32,10 @@ export default function AdminTemplate({ children }: PropsWithChildren) {
 
     currentTabValue && setValue(currentTabValue);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isAdmin) redirect("/collections");
+  }, [isAdmin]);
 
   if (!value) return null;
 
